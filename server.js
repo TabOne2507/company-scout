@@ -7,6 +7,7 @@ import * as cheerio from "cheerio";
 import OpenAI from "openai";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import { existsSync } from "fs";
 import "dotenv/config";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -19,7 +20,14 @@ const PORT = process.env.PORT || 3000;
 app.use(helmet({ contentSecurityPolicy: false }));
 app.use(cors({ origin: process.env.ALLOWED_ORIGIN || "*" }));
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static(join(__dirname, "public")));
+
+// Resolve public directory — works locally and on Render/Railway/Fly
+const publicDir = join(__dirname, "public");
+console.log(`📁 Serving static files from: ${publicDir} (exists: ${existsSync(publicDir)})`);
+app.use(express.static(publicDir));
+
+// Explicit root + catch-all so "Cannot GET /" never appears
+app.get("/", (_, res) => res.sendFile(join(publicDir, "index.html")));
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -141,7 +149,7 @@ ${context.slice(0, 20000)}`;
     response_format: { type: "json_object" },
   });
 
-  const raw = completion.chat?.choices?.[0]?.message?.content || completion.choices[0].message.content;
+  const raw = completion.choices[0].message.content;
   const parsed = JSON.parse(raw);
   return parsed;
 }
@@ -160,7 +168,6 @@ app.post("/api/search", async (req, res) => {
   if (query.length > 300) return res.status(400).json({ error: "Query too long." });
 
   try {
-    // Init OpenAI with user's key
     const openai = new OpenAI({ apiKey: apiKey.trim() });
 
     // Step 1: Generate optimized search queries via OpenAI
@@ -179,9 +186,7 @@ Make them specific and varied. Focus on finding company websites and lists.`,
       temperature: 0.4,
     });
 
-    const { queries } = JSON.parse(
-      queryGen.choices[0].message.content
-    );
+    const { queries } = JSON.parse(queryGen.choices[0].message.content);
     const searchQueries = [query, ...(queries || [])].slice(0, 4);
 
     // Step 2: Search DuckDuckGo for each query
@@ -229,7 +234,6 @@ Make them specific and varied. Focus on finding company websites and lists.`,
     const result = await extractCompanyData(openai, enrichedPages, query);
     result.totalFound = result.companies?.length || 0;
 
-    // Sort by relevance
     if (result.companies) {
       result.companies.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
     }
@@ -257,7 +261,10 @@ Make them specific and varied. Focus on finding company websites and lists.`,
   }
 });
 
+// ── Catch-all: serve index.html for any unmatched GET (SPA fallback) ──────────
+app.get("*", (_, res) => res.sendFile(join(publicDir, "index.html")));
+
 // ── Start ──────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 CompanyScout server running on http://localhost:${PORT}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`🚀 CompanyScout running on http://0.0.0.0:${PORT}`);
 });
