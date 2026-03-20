@@ -280,7 +280,7 @@ app.listen(PORT, "0.0.0.0", function() {
 // ═════════════════════════════════════════════════════════════════════════════
 async function callGemini(apiKey, prompt, temperature) {
   const url =
-    "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
+    "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
     apiKey.trim();
 
   const body = {
