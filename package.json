@@ -1,18 +1,14 @@
 {
   "name": "company-scout",
-  "version": "1.0.0",
-  "description": "AI-powered company discovery engine — scrapes the web and extracts company data using OpenAI",
+  "version": "2.0.0",
+  "description": "AI-powered company discovery engine using Google Gemini",
   "type": "module",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node --watch server.js",
-    "lint": "eslint .",
-    "test": "echo \"No tests yet\" && exit 0"
+    "dev": "node --watch server.js"
   },
-  "engines": {
-    "node": ">=18.0.0"
-  },
+  "engines": { "node": ">=18.0.0" },
   "dependencies": {
     "axios": "^1.7.7",
     "cheerio": "^1.0.0",
@@ -21,11 +17,7 @@
     "express": "^4.21.0",
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.0.0",
-    "openai": "^4.67.1"
+    "@google/generative-ai": "^0.21.0"
   },
-  "devDependencies": {
-    "eslint": "^9.11.1"
-  },
-  "keywords": ["company-search", "web-scraping", "openai", "business-intelligence"],
   "license": "MIT"
 }
