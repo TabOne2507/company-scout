@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CompanyScout — AI Company Discovery</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet"
+  />
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Tokens ── */
+    :root {
+      --bg:    #0c0c10;
+      --bg2:   #111116;
+      --bg3:   #17171d;
+      --bg4:   #1d1d24;
+      --bd:    #22222c;
+      --bd2:   #2c2c3a;
+      --tx:    #eeedf2;
+      --mt:    #888799;
+      --mt2:   #50505f;
+      --ac:    #6c63ff;
+      --acg:   rgba(108,99,255,.15);
+      --gr:    #3ecf8e;
+      --ye:    #f5c842;
+      --re:    #ff6060;
+      --bl:    #60a5fa;
+      --card:  #0f0f14;
+      --r:     10px;
+    }
+
+    html { font-size: 16px; scroll-behavior: smooth; }
+    body {
+      font-family: Inter, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg2); }
+    ::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 3px; }
+
+    /* Layout */
+    .w { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+    @media (max-width: 600px) { .w { padding: 0 14px; } }
+
+    /* ── Nav ── */
+    nav {
+      padding: 14px 0;
+      border-bottom: 1px solid var(--bd);
+      background: rgba(12,12,16,.96);
+      backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; }
+    .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .brand-icon {
+      width: 32px; height: 32px;
+      background: var(--ac);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      flex-shrink: 0;
+    }
+    .brand-icon svg { width: 17px; height: 17px; stroke: #fff; fill: none; stroke-width: 2.2; }
+    .brand-name {
+      font-family: Syne, sans-serif;
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: var(--tx);
+      letter-spacing: -.02em;
+    }
+    .nav-pill {
+      font-size: .6rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--mt);
+      background: var(--bg3);
+      border: 1px solid var(--bd2);
+      padding: 4px 11px;
+      border-radius: 20px;
+    }
+
+    /* ── Hero ── */
+    .hero { padding: 52px 0 40px; }
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .67rem;
+      font-weight: 600;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--ac);
+      background: var(--acg);
+      border: 1px solid rgba(108,99,255,.3);
+      padding: 5px 13px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .blink { width: 6px; height: 6px; background: var(--ac); border-radius: 50%; animation: blink 1.8s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    h1 {
+      font-family: Syne, sans-serif;
+      font-size: clamp(2rem, 4.2vw, 3.3rem);
+      font-weight: 800;
+      line-height: 1.05;
+      letter-spacing: -.04em;
+      color: var(--tx);
+      max-width: 640px;
+      margin-bottom: 16px;
+    }
+    h1 .hi { color: var(--ac); }
+
+    .hero-sub {
+      font-size: .9rem;
+      color: var(--mt);
+      max-width: 460px;
+      line-height: 1.85;
+      font-weight: 300;
+      margin-bottom: 32px;
+    }
+
+    .features { display: flex; gap: 10px; flex-wrap: wrap; }
+    .feat {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: .72rem;
+      font-weight: 500;
+      color: var(--mt);
+      background: var(--bg3);
+      border: 1px solid var(--bd);
+      padding: 6px 13px;
+      border-radius: 7px;
+    }
+    .feat svg { width: 13px; height: 13px; stroke: var(--ac); fill: none; stroke-width: 2; flex-shrink: 0; }
+
+    /* ── Panel ── */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 14px;
+      padding: 30px;
+      margin-bottom: 26px;
+    }
+    .panel-title {
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--mt2);
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .panel-title::after { content: ""; flex: 1; height: 1px; background: var(--bd); }
+
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 560px) { .grid2 { grid-template-columns: 1fr; } }
+    .span2 { grid-column: 1 / -1; }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: .63rem;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--mt);
+    }
+    .field-hint { font-size: .59rem; color: var(--mt2); margin-top: 2px; }
+
+    input, select {
+      font-family: Inter, sans-serif;
+      font-size: .86rem;
+      padding: 12px 14px;
+      border: 1px solid var(--bd2);
+      border-radius: 8px;
+      background: var(--bg2);
+      color: var(--tx);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      width: 100%;
+    }
+    input:focus, select:focus {
+      border-color: var(--ac);
+      box-shadow: 0 0 0 3px var(--acg);
+    }
+    input::placeholder { color: var(--mt2); font-weight: 300; }
+    select option { background: var(--bg2); }
+
+    .toggle {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 12px 14px;
+      border: 1px solid var(--bd2);
+      border-radius: 8px;
+      background: var(--bg2);
+      cursor: pointer;
+      user-select: none;
+      transition: border-color .15s;
+    }
+    .toggle:hover { border-color: var(--ac); }
+    .toggle input[type="checkbox"] { width: 15px; height: 15px; accent-color: var(--ac); flex-shrink: 0; cursor: pointer; }
+    .toggle-text { font-size: .82rem; color: var(--mt); line-height: 1.4; }
+    .toggle-text b { color: var(--tx); font-weight: 500; display: block; margin-bottom: 2px; }
+
+    /* ── Search button ── */
+    #searchBtn {
+      width: 100%;
+      font-family: Syne, sans-serif;
+      font-size: .92rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 16px 24px;
+      background: var(--ac);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background .15s, box-shadow .15s, opacity .1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 11px;
+      box-shadow: 0 4px 18px rgba(108,99,255,.34);
+    }
+    #searchBtn:hover { background: #7c74ff; box-shadow: 0 6px 26px rgba(108,99,255,.5); }
+    #searchBtn:active { opacity: .9; }
+    #searchBtn:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+    .spin {
+      display: none;
+      width: 17px; height: 17px;
+      border: 2.5px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: rotate .65s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    #searchBtn.busy .spin { display: block; }
+    #searchBtn.busy .btn-label { opacity: .55; }
+
+    /* ── Live log ── */
+    #logPanel {
+      background: var(--bg2);
+      border: 1px solid var(--bd2);
+      border-radius: 12px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .log-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 15px;
+      border-bottom: 1px solid var(--bd);
+      background: var(--bg3);
+    }
+    .log-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .6rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--mt);
+    }
+    #logDot { width: 7px; height: 7px; border-radius: 50%; background: var(--mt2); flex-shrink: 0; }
+    #logDot.live { background: var(--gr); animation: blink 1s infinite; }
+    .log-btns { display: flex; gap: 5px; }
+    .log-btn {
+      font-family: "JetBrains Mono", monospace;
+      font-size: .58rem;
+      padding: 3px 9px;
+      border: 1px solid var(--bd2);
+      background: transparent;
+      color: var(--mt2);
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .log-btn:hover { color: var(--mt); border-color: var(--mt); }
+    #logBody {
+      font-family: "JetBrains Mono", monospace;
+      font-size: .71rem;
+      line-height: 1.55;
+      padding: 12px 15px;
+      max-height: 270px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .log-row { display: flex; gap: 9px; align-items: baseline; }
+    .log-ts { color: var(--mt2); flex-shrink: 0; font-size: .62rem; }
+    .log-lvl {
+      flex-shrink: 0;
+      font-size: .58rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      min-width: 38px;
+      text-align: center;
+    }
+    .log-lvl.info { background: rgba(96,165,250,.1);  color: var(--bl); }
+    .log-lvl.ok   { background: rgba(62,207,142,.1);  color: var(--gr); }
+    .log-lvl.warn { background: rgba(245,200,66,.1);  color: var(--ye); }
+    .log-lvl.err  { background: rgba(255,96,96,.1);   color: var(--re); }
+    .log-lvl.step { background: rgba(108,99,255,.15); color: var(--ac); }
+    .log-msg { color: var(--tx); word-break: break-all; }
+
+    /* ── Error box ── */
+    #errBox {
+      display: none;
+      padding: 13px 17px;
+      background: rgba(255,96,96,.07);
+      border: 1px solid rgba(255,96,96,.25);
+      border-radius: 9px;
+      color: var(--re);
+      font-size: .82rem;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    #errBox.show { display: block; }
+
+    /* ── Results bar ── */
+    #resultsBar {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--bd);
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    #resultsBar.show { display: flex; }
+    #resultCount {
+      font-family: Syne, sans-serif;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--tx);
+      line-height: 1;
+    }
+    #resultCount em { color: var(--ac); font-style: normal; }
+    #resultMeta { font-size: .64rem; color: var(--mt2); margin-top: 5px; }
+    .result-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-sm {
+      font-size: .68rem;
+      font-weight: 500;
+      padding: 7px 15px;
+      border: 1px solid var(--bd2);
+      background: transparent;
+      color: var(--mt);
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all .15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+    .btn-sm:hover { border-color: var(--tx); color: var(--tx); }
+    .btn-sm.accent { background: var(--ac); color: #fff; border-color: var(--ac); }
+    .btn-sm.accent:hover { background: #7c74ff; border-color: #7c74ff; }
+
+    /* ── Summary ── */
+    #summaryBox {
+      display: none;
+      font-size: .83rem;
+      color: var(--mt);
+      line-height: 1.85;
+      padding: 14px 18px;
+      background: var(--bg3);
+      border-left: 3px solid var(--ac);
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 22px;
+    }
+    #summaryBox.show { display: block; }
+
+    /* ── Filter chips ── */
+    #filterBar {
+      display: none;
+      gap: 7px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    #filterBar.show { display: flex; }
+    .filter-label { font-size: .59rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mt2); }
+    .chip {
+      font-size: .64rem;
+      font-weight: 500;
+      padding: 4px 12px;
+      border: 1px solid var(--bd2);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--mt);
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .chip:hover { border-color: var(--ac); color: var(--ac); }
+    .chip.active { background: var(--ac); color: #fff; border-color: var(--ac); }
+
+    /* ── Cards grid ── */
+    #cardsGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(330px, 1fr));
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+    @media (max-width: 700px) { #cardsGrid { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--bd);
+      border-radius: 13px;
+      overflow: hidden;
+      transition: border-color .2s, transform .2s, box-shadow .2s;
+      animation: fadeUp .38s ease both;
+      display: flex;
+      flex-direction: column;
+    }
+    @keyframes fadeUp { from { opacity:0; transform: translateY(10px); } to { opacity:1; transform:none; } }
+    .card:hover { border-color: var(--ac); transform: translateY(-3px); box-shadow: 0 12px 40px rgba(0,0,0,.55); }
+    .card-stripe { height: 3px; background: linear-gradient(90deg, var(--ac), #a78bfa); opacity: 0; transition: opacity .2s; }
+    .card:hover .card-stripe { opacity: 1; }
+
+    .card-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; flex: 1; }
+    .card-header { display: flex; align-items: flex-start; gap: 12px; }
+    .card-avatar {
+      width: 42px; height: 42px;
+      border-radius: 9px;
+      background: var(--bg3);
+      border: 1px solid var(--bd2);
+      display: grid; place-items: center;
+      font-family: Syne, sans-serif;
+      font-weight: 800;
+      font-size: .92rem;
+      color: var(--ac);
+      flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .card-title-wrap { flex: 1; min-width: 0; }
+    .card-name {
+      font-family: Syne, sans-serif;
+      font-size: .97rem;
+      font-weight: 700;
+      color: var(--tx);
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 3px;
+    }
+    .card-industry { font-size: .62rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--mt2); }
+    .card-score-wrap { text-align: right; flex-shrink: 0; }
+    .card-score-num { font-family: Syne, sans-serif; font-size: 1.2rem; font-weight: 800; line-height: 1; }
+    .card-score-lbl { font-size: .5rem; letter-spacing: .1em; text-transform: uppercase; color: var(--mt2); margin-top: 1px; }
+    .card-desc { font-size: .79rem; color: var(--mt); line-height: 1.75; font-weight: 300; }
+
+    .card-details { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .card-detail { padding: 8px 10px; background: var(--bg2); border-radius: 6px; border: 1px solid var(--bd); }
+    .detail-label { font-size: .5rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mt2); margin-bottom: 2px; }
+    .detail-value { font-size: .73rem; color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    .card-products { padding: 10px 12px; background: var(--bg2); border-radius: 6px; border: 1px solid var(--bd); }
+    .products-label { font-size: .5rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--mt2); margin-bottom: 7px; }
+    .products-list { display: flex; flex-wrap: wrap; gap: 5px; }
+    .product-pill { font-size: .63rem; font-weight: 500; padding: 2px 9px; background: var(--bg3); border: 1px solid var(--bd2); border-radius: 3px; color: var(--tx); }
+
+    .card-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag { font-size: .57rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; background: rgba(108,99,255,.1); color: var(--ac); border-radius: 3px; border: 1px solid rgba(108,99,255,.2); }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 20px;
+      border-top: 1px solid var(--bd);
+      background: var(--bg2);
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .card-link { font-size: .66rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--ac); text-decoration: none; display: flex; align-items: center; gap: 4px; transition: gap .15s; }
+    .card-link:hover { gap: 7px; }
+    .card-socials { display: flex; gap: 6px; }
+    .card-socials a { font-size: .59rem; font-weight: 500; color: var(--mt); padding: 2px 7px; border: 1px solid var(--bd2); border-radius: 3px; text-decoration: none; transition: all .15s; }
+    .card-socials a:hover { border-color: var(--ac); color: var(--ac); }
+    .card-src { font-size: .55rem; color: var(--mt2); max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── Load more ── */
+    #moreSection { display: none; text-align: center; padding: 6px 0 48px; }
+    #moreSection.show { display: block; }
+    #moreBtn {
+      font-family: Syne, sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 13px 42px;
+      background: transparent;
+      color: var(--tx);
+      border: 1.5px solid var(--bd2);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #moreBtn:hover { border-color: var(--ac); color: var(--ac); box-shadow: 0 0 20px var(--acg); }
+    #moreBtn:disabled { opacity: .35; cursor: not-allowed; box-shadow: none; }
+    #moreBtn .spin { width: 14px; height: 14px; border-width: 2px; display: none; }
+    #moreBtn.busy .spin { display: block; }
+    .more-hint { font-size: .65rem; color: var(--mt2); margin-top: 10px; }
+
+    /* ── Sources ── */
+    #sourcesSection { display: none; margin-bottom: 44px; padding: 20px 24px; background: var(--bg3); border-radius: 12px; border: 1px solid var(--bd); }
+    #sourcesSection.show { display: block; }
+    .sources-label { font-size: .58rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--mt2); margin-bottom: 11px; display: flex; align-items: center; gap: 9px; }
+    .sources-label::after { content: ""; flex: 1; height: 1px; background: var(--bd); }
+    .sources-list { display: flex; flex-wrap: wrap; gap: 7px; }
+    .source-link { font-size: .61rem; padding: 4px 10px; background: var(--bg2); border: 1px solid var(--bd); border-radius: 4px; color: var(--mt2); text-decoration: none; max-width: 190px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; display: block; transition: all .15s; }
+    .source-link:hover { border-color: var(--ac); color: var(--ac); }
+
+    /* ── Footer ── */
+    footer { border-top: 1px solid var(--bd); padding: 22px 0; text-align: center; font-size: .64rem; color: var(--mt2); line-height: 1.9; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="w nav-inner">
+    <a class="brand" href="/">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m21 21-4.35-4.35"/>
+          <path d="M11 8v6M8 11h6"/>
+        </svg>
+      </div>
+      <span class="brand-name">CompanyScout</span>
+    </a>
+    <span class="nav-pill">Gemini AI</span>
+  </div>
+</nav>
+
+<main>
+<div class="w">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">
+      <span class="blink"></span>
+      AI-Powered Discovery
+    </div>
+    <h1>Find any company<br/>across the <span class="hi">entire web.</span></h1>
+    <p class="hero-sub">
+      Describe what you're looking for. Our AI searches the web, scrapes company pages,
+      and extracts structured business intelligence — instantly.
+    </p>
+    <div class="features">
+      <span class="feat">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Live web scraping
+      </span>
+      <span class="feat">
+        <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        Up to 50 companies
+      </span>
+      <span class="feat">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+        CSV &amp; JSON export
+      </span>
+      <span class="feat">
+        <svg viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        Live debug log
+      </span>
+    </div>
+  </div>
+
+  <!-- SEARCH PANEL -->
+  <div class="panel">
+    <div class="panel-title">Configure Search</div>
+    <div class="grid2">
+
+      <div class="field span2">
+        <span class="field-label">What companies are you looking for?</span>
+        <input
+          id="inputQuery"
+          type="text"
+          placeholder="e.g. AI healthcare startups in India, SaaS fintech in Europe, B2B logistics software..."
+          autocomplete="off"
+        />
+        <span class="field-hint">Be specific — include industry, geography, company stage, or technology</span>
+      </div>
+
+      <div class="field span2">
+        <span class="field-label">Gemini API Key</span>
+        <input
+          id="inputKey"
+          type="password"
+          placeholder="AIzaSy..."
+          autocomplete="off"
+        />
+        <span class="field-hint">
+          Free key at <strong>aistudio.google.com</strong> &rarr; Sign in &rarr; Get API key &mdash; Never stored on this server
+        </span>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Max Companies</span>
+        <select id="inputMax">
+          <option value="10">10 companies</option>
+          <option value="20" selected>20 companies</option>
+          <option value="30">30 companies</option>
+          <option value="50">50 companies</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <span class="field-label">Scan Depth</span>
+        <label class="toggle">
+          <input type="checkbox" id="inputDeep" />
+          <span class="toggle-text">
+            <b>Deep Scan</b>
+            Crawl more pages for richer results (2&times; slower)
+          </span>
+        </label>
+      </div>
+
+      <div class="span2">
+        <button id="searchBtn" type="button">
+          <div class="spin"></div>
+          <span class="btn-label">Discover Companies &rarr;</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- LIVE LOG -->
+  <div id="logPanel">
+    <div class="log-header">
+      <div class="log-title">
+        <span id="logDot"></span>
+        Live Log
+      </div>
+      <div class="log-btns">
+        <button class="log-btn" id="clearLogBtn">Clear</button>
+        <button class="log-btn" id="toggleLogBtn">Hide</button>
+      </div>
+    </div>
+    <div id="logBody"></div>
+  </div>
+
+  <!-- ERROR -->
+  <div id="errBox"></div>
+
+  <!-- RESULTS BAR -->
+  <div id="resultsBar">
+    <div>
+      <div id="resultCount"><em>0</em> Companies Found</div>
+      <div id="resultMeta"></div>
+    </div>
+    <div class="result-actions">
+      <button class="btn-sm" id="btnCSV"  style="display:none" onclick="exportCSV()">&#8595; CSV</button>
+      <button class="btn-sm" id="btnJSON" style="display:none" onclick="exportJSON()">&#8595; JSON</button>
+      <button class="btn-sm accent" id="btnNext" style="display:none" onclick="search(true)">&#8635; Find Next Batch</button>
+    </div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div id="summaryBox"></div>
+
+  <!-- FILTER CHIPS -->
+  <div id="filterBar"></div>
+
+  <!-- CARDS -->
+  <div id="cardsGrid"></div>
+
+  <!-- LOAD MORE -->
+  <div id="moreSection">
+    <button id="moreBtn" onclick="search(true)">
+      <div class="spin"></div>
+      <span>Find Next Companies &rarr;</span>
+    </button>
+    <div class="more-hint">Continues with new queries to find additional companies</div>
+  </div>
+
+  <!-- SOURCES -->
+  <div id="sourcesSection">
+    <div class="sources-label">Pages Scraped</div>
+    <div class="sources-list" id="sourcesList"></div>
+  </div>
+
+</div>
+</main>
+
+<footer>
+  <div class="w">
+    CompanyScout &mdash; API keys are never stored or logged &mdash;
+    Built with Express, Cheerio &amp; Google Gemini
+  </div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// State
+// ─────────────────────────────────────────────────────────────────────────────
+var allCompanies = [];
+var currentQuery = "";
+var isNextBatch  = false;
+var batchOffset  = 0;
+var logBodyEl    = document.getElementById("logBody");
+var logVisible   = true;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Log helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function logTS() {
+  var d = new Date();
+  var hh = String(d.getHours()).padStart(2, "0");
+  var mm = String(d.getMinutes()).padStart(2, "0");
+  var ss = String(d.getSeconds()).padStart(2, "0");
+  var ms = String(d.getMilliseconds()).padStart(3, "0");
+  return hh + ":" + mm + ":" + ss + "." + ms;
+}
+
+function addLog(lvl, msg) {
+  var row = document.createElement("div");
+  row.className = "log-row";
+  // safe-encode
+  var safemsg = String(msg)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  row.innerHTML =
+    '<span class="log-ts">' + logTS() + '</span>' +
+    '<span class="log-lvl ' + lvl + '">' + lvl.toUpperCase() + '</span>' +
+    '<span class="log-msg">' + safemsg + '</span>';
+  logBodyEl.appendChild(row);
+  logBodyEl.scrollTop = logBodyEl.scrollHeight;
+  // Keep max 400 lines
+  while (logBodyEl.children.length > 400) {
+    logBodyEl.removeChild(logBodyEl.firstChild);
+  }
+}
+
+function injectServerLogs(logs) {
+  if (!Array.isArray(logs)) return;
+  for (var i = 0; i < logs.length; i++) {
+    var l = logs[i];
+    addLog(l.lvl || "info", "[SRV] " + l.msg);
+  }
+}
+
+document.getElementById("clearLogBtn").onclick = function () {
+  logBodyEl.innerHTML = "";
+};
+document.getElementById("toggleLogBtn").onclick = function () {
+  logVisible = !logVisible;
+  logBodyEl.style.display = logVisible ? "" : "none";
+  document.getElementById("toggleLogBtn").textContent = logVisible ? "Hide" : "Show";
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Error / UI helpers
+// ─────────────────────────────────────────────────────────────────────────────
+function showErr(msg) {
+  var el = document.getElementById("errBox");
+  el.innerHTML = "<strong>Error:</strong> " + escHTML(msg);
+  el.classList.add("show");
+}
+function hideErr() {
+  document.getElementById("errBox").classList.remove("show");
+}
+function escHTML(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function setBusy(busy) {
+  var btn = document.getElementById("searchBtn");
+  btn.disabled = busy;
+  if (busy) { btn.classList.add("busy"); }
+  else       { btn.classList.remove("busy"); }
+}
+function setMoreBusy(busy) {
+  var btn = document.getElementById("moreBtn");
+  btn.disabled = busy;
+  if (busy) { btn.classList.add("busy"); }
+  else       { btn.classList.remove("busy"); }
+  var b2 = document.getElementById("btnNext");
+  if (b2) b2.disabled = busy;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main search function
+// ─────────────────────────────────────────────────────────────────────────────
+function search(isNext) {
+  var query   = document.getElementById("inputQuery").value.trim();
+  var apiKey  = document.getElementById("inputKey").value.trim();
+  var maxRes  = parseInt(document.getElementById("inputMax").value, 10);
+  var deep    = document.getElementById("inputDeep").checked;
+
+  addLog("info", "=== Search triggered ===");
+  addLog("info", "Query: " + query);
+  addLog("info", "Key prefix: " + (apiKey.slice(0, 8) || "(empty)"));
+  addLog("info", "Max: " + maxRes + " | Deep: " + deep + " | Next: " + !!isNext);
+
+  if (!query) {
+    addLog("err", "No query provided");
+    showErr("Please enter a search query.");
+    return;
+  }
+  if (!apiKey) {
+    addLog("err", "No API key provided");
+    showErr("Please enter your Gemini API key. Get one free at aistudio.google.com");
+    return;
+  }
+
+  isNextBatch  = !!isNext;
+  currentQuery = query;
+  hideErr();
+
+  if (isNextBatch) {
+    batchOffset += allCompanies.length;
+    setMoreBusy(true);
+    addLog("info", "Next batch — offset: " + batchOffset);
+  } else {
+    batchOffset = 0;
+    allCompanies = [];
+    setBusy(true);
+    clearResults();
+  }
+
+  document.getElementById("logDot").classList.add("live");
+  addLog("step", "Sending POST /api/search ...");
+
+  var payload = JSON.stringify({
+    query      : query,
+    apiKey     : apiKey,
+    maxResults : maxRes,
+    deepScrape : deep,
+    offset     : batchOffset,
+  });
+
+  var t0 = Date.now();
+
+  fetch("/api/search", {
+    method  : "POST",
+    headers : { "Content-Type": "application/json" },
+    body    : payload,
+  })
+  .then(function (resp) {
+    addLog("info", "HTTP " + resp.status + " in " + (Date.now() - t0) + "ms");
+    return resp.text().then(function (txt) {
+      addLog("info", "Response size: " + txt.length + " bytes");
+      if (txt.length > 0) {
+        addLog("info", "Preview: " + txt.slice(0, 120));
+      }
+      var data;
+      try {
+        data = JSON.parse(txt);
+      } catch (pe) {
+        addLog("err", "JSON parse error: " + pe.message);
+        addLog("err", "Raw: " + txt.slice(0, 200));
+        throw new Error("Server returned invalid response: " + txt.slice(0, 100));
+      }
+      if (!resp.ok) {
+        if (data.logs) injectServerLogs(data.logs);
+        throw new Error(data.error || ("Server error " + resp.status));
+      }
+      return data;
+    });
+  })
+  .then(function (data) {
+    if (data.logs) injectServerLogs(data.logs);
+
+    var companies = Array.isArray(data.companies) ? data.companies : [];
+    addLog("ok", "Received " + companies.length + " companies");
+
+    if (data.meta) {
+      addLog("info", "Pages scraped: " + (data.meta.pagesScraped || 0));
+      addLog("info", "Queries used: " + (data.meta.queriesUsed || []).join(" | "));
+    }
+
+    allCompanies = isNextBatch
+      ? allCompanies.concat(companies)
+      : companies;
+
+    if (isNextBatch) {
+      appendCards(companies, allCompanies.length - companies.length);
+    } else {
+      renderResults(data);
+    }
+
+    updateResultsBar(allCompanies.length, data);
+    addLog("ok", "=== Done — " + allCompanies.length + " total companies ===");
+  })
+  .catch(function (err) {
+    addLog("err", "FETCH ERROR: " + err.message);
+    showErr(err.message);
+  })
+  .finally(function () {
+    setBusy(false);
+    setMoreBusy(false);
+    document.getElementById("logDot").classList.remove("live");
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Render results
+// ─────────────────────────────────────────────────────────────────────────────
+function renderResults(data) {
+  var companies = Array.isArray(data.companies) ? data.companies : [];
+
+  document.getElementById("resultsBar").classList.add("show");
+
+  if (data.summary) {
+    var sb = document.getElementById("summaryBox");
+    sb.textContent = data.summary;
+    sb.classList.add("show");
+  }
+
+  buildFilters(companies);
+
+  var grid = document.getElementById("cardsGrid");
+  for (var i = 0; i < companies.length; i++) {
+    grid.appendChild(buildCard(companies[i], i));
+  }
+
+  // Sources
+  if (data.searchedUrls && data.searchedUrls.length > 0) {
+    document.getElementById("sourcesSection").classList.add("show");
+    var sl = document.getElementById("sourcesList");
+    var urls = data.searchedUrls.slice(0, 24);
+    for (var j = 0; j < urls.length; j++) {
+      var a = document.createElement("a");
+      a.className = "source-link";
+      a.href      = urls[j];
+      a.target    = "_blank";
+      a.rel       = "noopener";
+      try { a.textContent = new URL(urls[j]).hostname; }
+      catch (_) { a.textContent = urls[j]; }
+      sl.appendChild(a);
+    }
+  }
+
+  if (companies.length > 0) {
+    document.getElementById("btnCSV").style.display  = "flex";
+    document.getElementById("btnJSON").style.display = "flex";
+    document.getElementById("btnNext").style.display = "flex";
+    document.getElementById("moreSection").classList.add("show");
+  }
+}
+
+function appendCards(companies, startIdx) {
+  var grid = document.getElementById("cardsGrid");
+  for (var i = 0; i < companies.length; i++) {
+    grid.appendChild(buildCard(companies[i], startIdx + i));
+  }
+  document.getElementById("moreSection").classList.add("show");
+}
+
+function updateResultsBar(count, data) {
+  document.getElementById("resultCount").innerHTML =
+    "<em>" + count + "</em> Compan" + (count === 1 ? "y" : "ies") + " Found";
+
+  var meta = data.meta || {};
+  document.getElementById("resultMeta").textContent =
+    (meta.pagesScraped || 0) + " pages scraped \u00b7 " +
+    ((meta.queriesUsed && meta.queriesUsed.length) || 0) + " queries used" +
+    (isNextBatch ? " \u00b7 expanded batch" : "");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Filter chips
+// ─────────────────────────────────────────────────────────────────────────────
+function buildFilters(companies) {
+  var industries = [];
+  for (var i = 0; i < companies.length; i++) {
+    var ind = companies[i].industry;
+    if (ind && industries.indexOf(ind) === -1) industries.push(ind);
+  }
+
+  var bar = document.getElementById("filterBar");
+  bar.innerHTML = '<span class="filter-label">Industry:</span>' +
+    '<span class="chip active" data-industry="all">All</span>';
+
+  for (var j = 0; j < Math.min(industries.length, 8); j++) {
+    var s = document.createElement("span");
+    s.className = "chip";
+    s.textContent = industries[j];
+    s.setAttribute("data-industry", industries[j]);
+    bar.appendChild(s);
+  }
+
+  bar.classList.add("show");
+
+  bar.addEventListener("click", function (e) {
+    var target = e.target;
+    if (!target.classList.contains("chip")) return;
+    var chips = document.querySelectorAll("#filterBar .chip");
+    for (var k = 0; k < chips.length; k++) chips[k].classList.remove("active");
+    target.classList.add("active");
+    var ind = target.getAttribute("data-industry");
+    var cards = document.querySelectorAll("#cardsGrid .card");
+    for (var m = 0; m < cards.length; m++) {
+      cards[m].style.display =
+        (ind === "all" || cards[m].getAttribute("data-industry") === ind) ? "" : "none";
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Build a company card
+// ─────────────────────────────────────────────────────────────────────────────
+function buildCard(c, idx) {
+  var card = document.createElement("div");
+  card.className = "card";
+  card.setAttribute("data-industry", c.industry || "");
+  card.style.animationDelay = Math.min(idx, 14) * 40 + "ms";
+
+  var score     = typeof c.relevanceScore === "number" ? c.relevanceScore : 0;
+  var scoreColor = score >= 80 ? "#3ecf8e" : score >= 60 ? "#6c63ff" : "#888799";
+  var initials  = (c.name || "?")
+    .split(" ")
+    .map(function (w) { return w.charAt(0) || ""; })
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  var website = c.website || c.source || "#";
+
+  // Details block
+  var detailsHTML = "";
+  var detailPairs = [];
+  if (c.founded)  detailPairs.push({ l: "Founded",  v: c.founded });
+  if (c.location) detailPairs.push({ l: "Location", v: c.location });
+  if (c.size)     detailPairs.push({ l: "Size",     v: c.size });
+  if (c.funding)  detailPairs.push({ l: "Funding",  v: c.funding });
+  if (detailPairs.length > 0) {
+    detailsHTML = '<div class="card-details">';
+    for (var i = 0; i < detailPairs.length; i++) {
+      detailsHTML +=
+        '<div class="card-detail">' +
+        '<div class="detail-label">'  + escHTML(detailPairs[i].l) + '</div>' +
+        '<div class="detail-value" title="' + escHTML(detailPairs[i].v) + '">' +
+        escHTML(detailPairs[i].v) + '</div></div>';
+    }
+    detailsHTML += '</div>';
+  }
+
+  // Products block
+  var productsHTML = "";
+  if (Array.isArray(c.keyProducts) && c.keyProducts.length > 0) {
+    var pills = c.keyProducts.slice(0, 5)
+      .map(function (p) { return '<span class="product-pill">' + escHTML(p) + '</span>'; })
+      .join("");
+    productsHTML =
+      '<div class="card-products">' +
+      '<div class="products-label">Key Products</div>' +
+      '<div class="products-list">' + pills + '</div>' +
+      '</div>';
+  }
+
+  // Tags block
+  var tagsHTML = "";
+  if (Array.isArray(c.tags) && c.tags.length > 0) {
+    tagsHTML = '<div class="card-tags">' +
+      c.tags.slice(0, 6).map(function (t) {
+        return '<span class="tag">' + escHTML(t) + '</span>';
+      }).join("") +
+      '</div>';
+  }
+
+  // Social links
+  var socialsHTML = "";
+  if (c.socialLinks) {
+    if (c.socialLinks.linkedin) {
+      socialsHTML += '<a href="' + escHTML(c.socialLinks.linkedin) + '" target="_blank" rel="noopener">LinkedIn &#8599;</a>';
+    }
+    if (c.socialLinks.twitter) {
+      socialsHTML += '<a href="' + escHTML(c.socialLinks.twitter) + '" target="_blank" rel="noopener">Twitter &#8599;</a>';
+    }
+  }
+
+  // Source domain
+  var srcDomain = "";
+  try { srcDomain = new URL(c.source || website).hostname; } catch (_) {}
+
+  card.innerHTML =
+    '<div class="card-stripe"></div>' +
+    '<div class="card-body">' +
+      '<div class="card-header">' +
+        '<div class="card-avatar">' + initials + '</div>' +
+        '<div class="card-title-wrap">' +
+          '<div class="card-name" title="' + escHTML(c.name) + '">' + escHTML(c.name) + '</div>' +
+          '<div class="card-industry">' + escHTML(c.industry || "\u2014") + '</div>' +
+        '</div>' +
+        '<div class="card-score-wrap">' +
+          '<div class="card-score-num" style="color:' + scoreColor + '">' + score + '%</div>' +
+          '<div class="card-score-lbl">match</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="card-desc">' + escHTML(c.description || "") + '</div>' +
+      detailsHTML +
+      productsHTML +
+      tagsHTML +
+    '</div>' +
+    '<div class="card-footer">' +
+      '<a class="card-link" href="' + escHTML(website) + '" target="_blank" rel="noopener">Visit Site &#8594;</a>' +
+      '<div class="card-socials">' + socialsHTML + '</div>' +
+      (srcDomain ? '<span class="card-src">' + escHTML(srcDomain) + '</span>' : '') +
+    '</div>';
+
+  return card;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Clear results
+// ─────────────────────────────────────────────────────────────────────────────
+function clearResults() {
+  document.getElementById("cardsGrid").innerHTML    = "";
+  document.getElementById("sourcesList").innerHTML  = "";
+  document.getElementById("filterBar").innerHTML    = "";
+
+  var toHide = ["resultsBar", "summaryBox", "filterBar", "sourcesSection", "moreSection"];
+  for (var i = 0; i < toHide.length; i++) {
+    document.getElementById(toHide[i]).classList.remove("show");
+  }
+
+  var toHideDisplay = ["btnCSV", "btnJSON", "btnNext"];
+  for (var j = 0; j < toHideDisplay.length; j++) {
+    document.getElementById(toHideDisplay[j]).style.display = "none";
+  }
+
+  allCompanies = [];
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Exports
+// ─────────────────────────────────────────────────────────────────────────────
+function exportJSON() {
+  var data = { query: currentQuery, total: allCompanies.length, companies: allCompanies };
+  var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  var a = document.createElement("a");
+  a.href     = URL.createObjectURL(blob);
+  a.download = "companyscout-" + Date.now() + ".json";
+  a.click();
+}
+
+function exportCSV() {
+  var headers = ["Name","Website","Industry","Founded","Location","Size","Funding","Description","Tags","Score","LinkedIn","Twitter"];
+  var rows = allCompanies.map(function (c) {
+    return [
+      c.name, c.website, c.industry, c.founded, c.location,
+      c.size, c.funding, c.description,
+      (Array.isArray(c.tags) ? c.tags.join("; ") : ""),
+      c.relevanceScore,
+      (c.socialLinks && c.socialLinks.linkedin) || "",
+      (c.socialLinks && c.socialLinks.twitter)  || "",
+    ].map(function (v) {
+      return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    }).join(",");
+  });
+  var csv  = [headers.join(",")].concat(rows).join("\n");
+  var blob = new Blob([csv], { type: "text/csv" });
+  var a    = document.createElement("a");
+  a.href     = URL.createObjectURL(blob);
+  a.download = "companyscout-" + Date.now() + ".csv";
+  a.click();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Wire up button and Enter key
+// ─────────────────────────────────────────────────────────────────────────────
+document.getElementById("searchBtn").addEventListener("click", function () {
+  search(false);
+});
+
+document.getElementById("inputQuery").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") search(false);
+});
+document.getElementById("inputKey").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") search(false);
+});
+
+// Initial log message — proves JS is running
+addLog("info", "CompanyScout v4 ready");
+addLog("info", "Enter your query and Gemini API key above, then click Discover");
+</script>
+</body>
+</html>
